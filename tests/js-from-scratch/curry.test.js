@@ -24,7 +24,7 @@ test('preserves `this` when fully applied', () => {
 test('a function with no parameters runs straight away', () => assert.equal(curry(() => 5)(), 5));
 test('a one-parameter function', () => assert.equal(curry((x) => x * 2)(21), 42));
 test('extra arguments are passed through', () => {
-  const count = curry(function (a, b) { return arguments.length; });
+  const count = curry(function (_a, _b) { return arguments.length; }); // arity 2, extra args still passed
   assert.equal(count(1, 2, 3), 3);
 });
 test('two chains from the same curried function do not interfere', () => {
