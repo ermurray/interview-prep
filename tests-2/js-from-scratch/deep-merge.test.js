@@ -30,3 +30,24 @@ test('result does not share nested objects with the inputs', () => {
 });
 test('deeply nested', () =>
   assert.deepEqual(deepMerge({ a: { b: { c: { d: 1 } } } }, { a: { b: { c: { e: 2 } } } }), { a: { b: { c: { d: 1, e: 2 } } } }));
+
+// ---- more edge cases ----
+test('an array in target is replaced by a non-array', () => assert.deepEqual(deepMerge({ a: [1, 2] }, { a: 'x' }), { a: 'x' }));
+test('null in target is replaced by an object', () => assert.deepEqual(deepMerge({ a: null }, { a: { b: 1 } }), { a: { b: 1 } }));
+test('empty source gives a copy of target', () => {
+  const target = { a: { b: 1 } };
+  const out = deepMerge(target, {});
+  assert.deepEqual(out, target);
+  assert.notEqual(out, target);
+  assert.notEqual(out.a, target.a);
+});
+test('empty target gives a copy of source', () => {
+  const source = { a: { b: 1 } };
+  const out = deepMerge({}, source);
+  assert.deepEqual(out, source);
+  assert.notEqual(out.a, source.a);
+});
+test('falsy source values (0, "", false, null) do overwrite', () =>
+  assert.deepEqual(deepMerge({ a: 1, b: 1, c: 1, d: 1 }, { a: 0, b: '', c: false, d: null }), { a: 0, b: '', c: false, d: null }));
+test('undefined deep in source is skipped', () =>
+  assert.deepEqual(deepMerge({ a: { b: 1, c: 2 } }, { a: { b: undefined, c: 3 } }), { a: { b: 1, c: 3 } }));

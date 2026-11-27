@@ -11,3 +11,11 @@ test('empty -> 0', () => assert.equal(minRemovalsToBalance(''), 0));
 test('only openers: "(((" -> 3', () => assert.equal(minRemovalsToBalance('((('), 3));
 test('reversed pair: ")(" -> 2', () => assert.equal(minRemovalsToBalance(')('), 2));
 test('large input', () => assert.equal(minRemovalsToBalance(')'.repeat(100000) + '('.repeat(100000)), 200000));
+
+// ---- more edge cases ----
+test('only closers: ")))" -> 3', () => assert.equal(minRemovalsToBalance(')))'), 3));
+test('siblings: "()()" -> 0', () => assert.equal(minRemovalsToBalance('()()'), 0));
+test('")(()" -> 2', () => assert.equal(minRemovalsToBalance(')(()'), 2));
+test('"(()))(" -> 2', () => assert.equal(minRemovalsToBalance('(()))('), 2));
+test('a single "(" -> 1', () => assert.equal(minRemovalsToBalance('('), 1));
+test('deeply nested and balanced', () => assert.equal(minRemovalsToBalance('('.repeat(100000) + ')'.repeat(100000)), 0));

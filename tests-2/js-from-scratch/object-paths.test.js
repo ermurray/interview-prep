@@ -22,3 +22,15 @@ test('getPath: through null -> defaultValue', () => assert.equal(getPath(data, '
 test('getPath: out-of-range index -> defaultValue', () => assert.equal(getPath(data, 'a.b[5].c', 'dflt'), 'dflt'));
 test('getPath: no default -> undefined', () => assert.equal(getPath(data, 'zzz'), undefined));
 test('getPath: whole sub-object', () => assert.deepEqual(getPath(data, 'a.b[0]'), { c: 42 }));
+
+// ---- more edge cases ----
+test('unflatten: three levels deep', () => assert.deepEqual(unflattenObject({ 'a.b.c': 1 }), { a: { b: { c: 1 } } }));
+test('unflatten: keys without dots stay at the top', () => assert.deepEqual(unflattenObject({ a: 1, b: 2 }), { a: 1, b: 2 }));
+test('unflatten: object values are kept as-is', () => {
+  const v = { x: 1 };
+  assert.equal(unflattenObject({ 'a.b': v }).a.b, v);
+});
+test('getPath: numeric segment written with a dot', () => assert.equal(getPath(data, 'a.b.0.c'), 42));
+test('getPath: path that starts with an index', () => assert.equal(getPath([{ a: 1 }], '[0].a'), 1));
+test('getPath: empty object -> default', () => assert.equal(getPath({}, 'a', 'dflt'), 'dflt'));
+test('getPath: null value at the end -> null (not the default)', () => assert.equal(getPath(data, 'n', 'dflt'), null));

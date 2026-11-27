@@ -20,3 +20,15 @@ test('performance: N = M = 100,000 with many resets runs in O(N + M)', () => {
   assert.equal(out[0], 50000);
   assert.ok(ms < 500, `took ${ms}ms; the naive reset is O(N·M)`);
 });
+
+// ---- more edge cases ----
+test('reset as the first operation', () => assert.deepEqual(countersWithReset(5, [6, 1]), [1, 0, 0, 0, 0]));
+test('increments after a reset build on the new floor', () =>
+  assert.deepEqual(countersWithReset(3, [1, 1, 4, 2, 4, 3]), [3, 3, 4]));
+test('several resets in a row', () => assert.deepEqual(countersWithReset(2, [1, 3, 3, 3, 2]), [1, 2]));
+test('every operation increments the same counter', () => assert.deepEqual(countersWithReset(3, [2, 2, 2]), [0, 3, 0]));
+test('large N with no operations', () => {
+  const out = countersWithReset(100000, []);
+  assert.equal(out.length, 100000);
+  assert.ok(out.every((v) => v === 0));
+});

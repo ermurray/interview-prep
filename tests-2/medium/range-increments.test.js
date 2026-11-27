@@ -17,3 +17,10 @@ test('performance: N = M = 100,000 full-range operations', () => {
   assert.equal(out[99999], 100000);
   assert.ok(ms < 500, `took ${ms}ms; applying every operation cell by cell is O(N·M)`);
 });
+
+// ---- more edge cases ----
+test('N = 1', () => assert.deepEqual(rangeIncrements(1, [[0, 0, 7], [0, 0, -2]]), [5]));
+test('operations that cancel out', () => assert.deepEqual(rangeIncrements(3, [[0, 2, 5], [0, 2, -5]]), [0, 0, 0]));
+test('range touching the last counter', () => assert.deepEqual(rangeIncrements(4, [[2, 3, 1]]), [0, 0, 1, 1]));
+test('negative values only', () => assert.deepEqual(rangeIncrements(3, [[0, 1, -1000], [1, 2, -1000]]), [-1000, -2000, -1000]));
+test('adjacent ranges do not overlap', () => assert.deepEqual(rangeIncrements(4, [[0, 1, 1], [2, 3, 2]]), [1, 1, 2, 2]));

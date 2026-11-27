@@ -25,3 +25,18 @@ test('Dates compare by time', () => {
   assert.equal(deepEqual(new Date(5), new Date(5)), true);
   assert.equal(deepEqual(new Date(5), new Date(6)), false);
 });
+
+// ---- more edge cases ----
+test('empty object vs empty array -> false', () => assert.equal(deepEqual({}, []), false));
+test('empty containers equal themselves', () => {
+  assert.equal(deepEqual({}, {}), true);
+  assert.equal(deepEqual([], []), true);
+});
+test('array order matters', () => assert.equal(deepEqual([1, 2], [2, 1]), false));
+test('deeply nested arrays', () => assert.equal(deepEqual([1, [2, [3, [4]]]], [1, [2, [3, [4]]]]), true));
+test('NaN nested inside arrays', () => assert.equal(deepEqual([NaN, { a: [NaN] }], [NaN, { a: [NaN] }]), true));
+test('number vs array containing it -> false', () => assert.equal(deepEqual(1, [1]), false));
+test('undefined vs null nested -> false', () => assert.equal(deepEqual({ a: undefined }, { a: null }), false));
+test('same keys, one value differs deep down', () =>
+  assert.equal(deepEqual({ a: { b: { c: { d: 1 } } } }, { a: { b: { c: { d: 2 } } } }), false));
+test('a Date vs a plain object -> false', () => assert.equal(deepEqual(new Date(0), {}), false));

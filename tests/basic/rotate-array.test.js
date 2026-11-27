@@ -17,3 +17,11 @@ test('large K on a large array is fast', () => {
   assert.equal(out.length, 100000);
   assert.equal(out[1], 0);
 });
+
+// ---- more edge cases ----
+test('negative values', () => assert.deepEqual(rotateArray([-1, -2, -3], 1), [-3, -1, -2]));
+test('two elements, K = 1 swaps them', () => assert.deepEqual(rotateArray([1, 2], 1), [2, 1]));
+test('K a large multiple of N leaves the array unchanged', () => assert.deepEqual(rotateArray([1, 2, 3], 3000000), [1, 2, 3]));
+test('K = N - 1 is a left rotation by one', () => assert.deepEqual(rotateArray([1, 2, 3, 4], 3), [2, 3, 4, 1]));
+test('duplicates', () => assert.deepEqual(rotateArray([1, 1, 2, 2], 1), [2, 1, 1, 2]));
+test('empty array with K = 0', () => assert.deepEqual(rotateArray([], 0), []));

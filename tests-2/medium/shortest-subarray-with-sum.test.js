@@ -13,3 +13,11 @@ test('large input is O(N)', () => {
   a[50000] = 10000;
   assert.equal(shortestSubarrayWithSum(a, 10002), 3);
 });
+
+// ---- more edge cases ----
+test('S equals the total -> whole array', () => assert.equal(shortestSubarrayWithSum([1, 2, 3, 4], 10), 4));
+test('a single element meets S', () => assert.equal(shortestSubarrayWithSum([1, 1, 9, 1], 9), 1));
+test('the first element already meets S', () => assert.equal(shortestSubarrayWithSum([100, 1, 1], 50), 1));
+test('the last element alone meets S', () => assert.equal(shortestSubarrayWithSum([1, 1, 1, 100], 100), 1));
+test('single element too small -> 0', () => assert.equal(shortestSubarrayWithSum([5], 6), 0));
+test('huge S out of reach -> 0', () => assert.equal(shortestSubarrayWithSum(new Array(1000).fill(10000), 1000000000), 0));

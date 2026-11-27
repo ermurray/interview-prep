@@ -50,3 +50,42 @@ test('tryRemove(count) is all-or-nothing', () => {
   assert.equal(b.tokens, 1, 'a failed tryRemove takes nothing');
   assert.equal(b.tryRemove(1), true);
 });
+
+// ---- more edge cases ----
+test('capacity 1', () => {
+  const c = clock();
+  const b = new TokenBucket({ capacity: 1, refillPerSecond: 1, now: c.now });
+  assert.equal(b.tryRemove(), true);
+  assert.equal(b.tryRemove(), false);
+});
+
+test('asking for more than capacity always fails', () => {
+  const c = clock();
+  const b = new TokenBucket({ capacity: 3, refillPerSecond: 100, now: c.now });
+  c.advance(10000);
+  assert.equal(b.tryRemove(4), false);
+  assert.equal(b.tokens, 3);
+});
+
+test('tokens reads 0 when empty', () => {
+  const c = clock();
+  const b = new TokenBucket({ capacity: 2, refillPerSecond: 1, now: c.now });
+  b.tryRemove(2);
+  assert.equal(b.tokens, 0);
+});
+
+test('refill continues while nobody calls it', () => {
+  const c = clock();
+  const b = new TokenBucket({ capacity: 10, refillPerSecond: 2, now: c.now });
+  b.tryRemove(10);
+  c.advance(2500);
+  assert.equal(b.tokens, 5);
+});
+
+test('reading tokens does not change them', () => {
+  const c = clock();
+  const b = new TokenBucket({ capacity: 5, refillPerSecond: 1, now: c.now });
+  b.tryRemove(3);
+  assert.equal(b.tokens, 2);
+  assert.equal(b.tokens, 2);
+});

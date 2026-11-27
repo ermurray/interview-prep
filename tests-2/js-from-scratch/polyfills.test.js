@@ -55,3 +55,44 @@ test('new: a primitive returned by the constructor is ignored', () => {
   function Prim() { this.a = 1; return 5; }
   assert.equal(myNew(Prim).a, 1);
 });
+
+// ---- more edge cases ----
+test('call: returns the function result', () => assert.equal(myCall.call(() => 42, {}), 42));
+test('call: works when the context already has a property with the same-looking name', () => {
+  const ctx = { name: 'ada', fn: 'keep me' };
+  myCall.call(greet, ctx, 'hi', '!');
+  assert.equal(ctx.fn, 'keep me');
+});
+test('call: a primitive context works', () => {
+  function self() { return typeof this === 'object' ? this.valueOf() : this; }
+  assert.equal(myCall.call(self, 'str'), 'str');
+});
+test('apply: works when installed on Function.prototype', () => {
+  Function.prototype.myApply = myApply;
+  try {
+    assert.equal(greet.myApply({ name: 'cy' }, ['hey', '?']), 'hey cy?');
+  } finally {
+    delete Function.prototype.myApply;
+  }
+});
+test('map: empty array -> []', () => assert.deepEqual(myMap.call([], (x) => x), []));
+test('map: same length as the input', () => assert.equal(myMap.call([1, 2, 3], () => null).length, 3));
+test('filter: nothing matches -> []', () => assert.deepEqual(myFilter.call([1, 2], () => false), []));
+test('filter: does not mutate', () => {
+  const arr = [1, 2, 3];
+  myFilter.call(arr, (x) => x > 1);
+  assert.deepEqual(arr, [1, 2, 3]);
+});
+test('new: a function returned by the constructor wins', () => {
+  const f = () => 'fn';
+  function ReturnsFn() { return f; }
+  assert.equal(myNew(ReturnsFn), f);
+});
+test('new: null returned by the constructor is ignored', () => {
+  function ReturnsNull() { this.ok = true; return null; }
+  assert.equal(myNew(ReturnsNull).ok, true);
+});
+test('new: passes arguments', () => {
+  function Point(x, y) { this.x = x; this.y = y; }
+  assert.deepEqual({ ...myNew(Point, 1, 2) }, { x: 1, y: 2 });
+});

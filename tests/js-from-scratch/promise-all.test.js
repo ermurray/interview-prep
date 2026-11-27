@@ -20,3 +20,17 @@ test('rejects with the first failure', async () =>
   assert.rejects(promiseAll([delay(30, 'slow'), delay(10, 'boom', true), delay(20, 'later', true)]), (e) => e === 'boom'));
 test('accepts any iterable (e.g. a Set)', async () =>
   assert.deepEqual(await promiseAll(new Set([1, 2, 3])), [1, 2, 3]));
+
+// ---- more edge cases ----
+test('array results are not flattened', async () => assert.deepEqual(await promiseAll([Promise.resolve([1, 2]), [3]]), [[1, 2], [3]]));
+test('thenables are adopted', async () => assert.deepEqual(await promiseAll([{ then: (r) => r(5) }]), [5]));
+test('a string is an iterable of characters', async () => assert.deepEqual(await promiseAll('ab'), ['a', 'b']));
+test('rejects with a non-Error reason', async () => assert.rejects(promiseAll([1, Promise.reject(42)]), (e) => e === 42));
+test('rejects even if the failure is the last to settle', async () =>
+  assert.rejects(promiseAll([delay(5, 'a'), delay(20, 'b', true)]), (e) => e === 'b'));
+test('undefined and null values are kept', async () => assert.deepEqual(await promiseAll([undefined, null]), [undefined, null]));
+test('1,000 promises', async () => {
+  const out = await promiseAll(Array.from({ length: 1000 }, (_, i) => Promise.resolve(i)));
+  assert.equal(out.length, 1000);
+  assert.equal(out[999], 999);
+});

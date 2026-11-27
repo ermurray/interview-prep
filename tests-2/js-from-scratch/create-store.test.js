@@ -56,3 +56,52 @@ test('a listener added during a dispatch is not called for that dispatch', () =>
   store.dispatch({ type: 'inc' });
   assert.deepEqual(seen, ['outer', 'outer', 'inner']);
 });
+
+// ---- more edge cases ----
+test('the reducer receives the current state and the action', () => {
+  const calls = [];
+  const store = createStore((state, action) => { calls.push([state, action]); return state + 1; }, 10);
+  const action = { type: 'any' };
+  store.dispatch(action);
+  assert.deepEqual(calls, [[10, action]]);
+});
+
+test('object state is replaced, not merged', () => {
+  const store = createStore((s, a) => (a.type === 'set' ? { only: a.value } : s), { a: 1, b: 2 });
+  store.dispatch({ type: 'set', value: 3 });
+  assert.deepEqual(store.getState(), { only: 3 });
+});
+
+test('subscribers run in the order they subscribed', () => {
+  const store = createStore(counter, 0);
+  const seen = [];
+  store.subscribe(() => seen.push(1));
+  store.subscribe(() => seen.push(2));
+  store.subscribe(() => seen.push(3));
+  store.dispatch({ type: 'inc' });
+  assert.deepEqual(seen, [1, 2, 3]);
+});
+
+test('dispatch with no subscribers still updates state', () => {
+  const store = createStore(counter, 0);
+  store.dispatch({ type: 'inc' });
+  assert.equal(store.getState(), 1);
+});
+
+test('subscribers are notified even when the state does not change', () => {
+  const store = createStore(counter, 0);
+  let calls = 0;
+  store.subscribe(() => calls++);
+  store.dispatch({ type: 'unknown' });
+  assert.equal(calls, 1);
+});
+
+test('unsubscribing one listener leaves the others', () => {
+  const store = createStore(counter, 0);
+  const seen = [];
+  const off = store.subscribe(() => seen.push('a'));
+  store.subscribe(() => seen.push('b'));
+  off();
+  store.dispatch({ type: 'inc' });
+  assert.deepEqual(seen, ['b']);
+});

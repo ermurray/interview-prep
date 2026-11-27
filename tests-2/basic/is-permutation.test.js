@@ -15,3 +15,14 @@ test('large permutation', () => {
   const a = Array.from({ length: 100000 }, (_, i) => 100000 - i);
   assert.equal(isPermutation(a), 1);
 });
+
+// ---- more edge cases ----
+test('[2, 1] -> 1', () => assert.equal(isPermutation([2, 1]), 1));
+test('[1, 3] -> 0 (3 is out of range)', () => assert.equal(isPermutation([1, 3]), 0));
+test('a duplicate replaces N: [3, 2, 1, 3] -> 0', () => assert.equal(isPermutation([3, 2, 1, 3]), 0));
+test('single large value: [100000] -> 0', () => assert.equal(isPermutation([100000]), 0));
+test('large permutation with one duplicate -> 0', () => {
+  const a = Array.from({ length: 100000 }, (_, i) => i + 1);
+  a[500] = 501 + 1;
+  assert.equal(isPermutation(a), 0);
+});

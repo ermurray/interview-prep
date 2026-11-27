@@ -77,3 +77,63 @@ test('two once listeners in a row both fire', () => {
   e.emit('x');
   assert.deepEqual(seen, [1, 2]);
 });
+
+// ---- more edge cases ----
+test('events with different names are independent', () => {
+  const e = new EventEmitter();
+  const seen = [];
+  e.on('a', () => seen.push('a'));
+  e.on('b', () => seen.push('b'));
+  e.emit('a');
+  assert.deepEqual(seen, ['a']);
+});
+
+test('a listener added during emit is not called for that emit', () => {
+  const e = new EventEmitter();
+  const seen = [];
+  e.on('x', () => {
+    seen.push('first');
+    e.on('x', () => seen.push('late'));
+  });
+  e.emit('x');
+  assert.deepEqual(seen, ['first']);
+});
+
+test('removing a later listener during emit does not skip the one after it', () => {
+  const e = new EventEmitter();
+  const seen = [];
+  const b = () => seen.push('b');
+  e.on('x', () => { seen.push('a'); e.off('x', b); });
+  e.on('x', b);
+  e.on('x', () => seen.push('c'));
+  e.emit('x');
+  assert.ok(seen.includes('a') && seen.includes('c'), `got ${JSON.stringify(seen)}`);
+});
+
+test('once passes arguments through', () => {
+  const e = new EventEmitter();
+  let got;
+  e.once('x', (...args) => { got = args; });
+  e.emit('x', 1, 2, 3);
+  assert.deepEqual(got, [1, 2, 3]);
+});
+
+test('emitting from inside a listener works', () => {
+  const e = new EventEmitter();
+  const seen = [];
+  e.on('outer', () => { seen.push('outer'); e.emit('inner'); });
+  e.on('inner', () => seen.push('inner'));
+  e.emit('outer');
+  assert.deepEqual(seen, ['outer', 'inner']);
+});
+
+test('off only removes the given listener', () => {
+  const e = new EventEmitter();
+  const seen = [];
+  const a = () => seen.push('a');
+  e.on('x', a);
+  e.on('x', () => seen.push('b'));
+  e.off('x', a);
+  e.emit('x');
+  assert.deepEqual(seen, ['b']);
+});
