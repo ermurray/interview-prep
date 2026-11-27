@@ -6,6 +6,7 @@
 //   node run-tests.js basic rotate-array              # one question (".js" optional)
 //   node run-tests.js medium passing-cars best-single-trade  # several questions
 //   node run-tests.js --series 2 hard                 # series 2 (prep-questions-2), also -s 2
+//   node run-tests.js -s 3 medium car-pooling         # series 3 (prep-questions-3)
 //   node run-tests.js --list                          # list sections and questions (add -s 2)
 //   node run-tests.js --spec basic                    # use Node's built-in reporter instead
 //
