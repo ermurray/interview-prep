@@ -1,21 +1,47 @@
 #!/usr/bin/env node
 // Run the unit tests for one question, one section, or everything.
 //
-//   node run-tests.js                         # every test
-//   node run-tests.js basic                   # every test in prep-questions/basic
-//   node run-tests.js basic rotate-array      # one question (".js" optional)
+//   node run-tests.js                                 # every test in series 1
+//   node run-tests.js basic                           # one section
+//   node run-tests.js basic rotate-array              # one question (".js" optional)
 //   node run-tests.js medium passing-cars best-single-trade  # several questions
-//   node run-tests.js --list                  # list sections and questions
+//   node run-tests.js --series 2 hard                 # series 2 (prep-questions-2), also -s 2
+//   node run-tests.js --list                          # list sections and questions (add -s 2)
 //
-// Via npm:  npm test -- basic rotate-array
+// Via npm:  npm test -- basic rotate-array    |    npm run test:2 -- hard
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
-const TESTS_DIR = path.join(path.dirname(__filename), 'tests');
-const args = process.argv.slice(2);
+const ROOT = path.dirname(__filename);
+
+const fail = (msg) => {
+  console.error(msg);
+  console.error('Run `node run-tests.js --list` (or `--list -s 2`) to see what is available.');
+  process.exit(1);
+};
+
+// ---- parse flags ----
+const args = [];
+let series = '1';
+let list = false;
+const argv = process.argv.slice(2);
+for (let i = 0; i < argv.length; i++) {
+  const a = argv[i];
+  if (a === '--help' || a === '-h') {
+    const lines = fs.readFileSync(__filename, 'utf8').split('\n').slice(1);
+    console.log(lines.slice(0, lines.findIndex((l) => !l.startsWith('//'))).map((l) => l.replace(/^\/\/ ?/, '')).join('\n'));
+    process.exit(0);
+  } else if (a === '--list') list = true;
+  else if (a === '--series' || a === '-s') series = argv[++i];
+  else if (a.startsWith('--series=')) series = a.slice('--series='.length);
+  else args.push(a);
+}
+
+const TESTS_DIR = path.join(ROOT, series === '1' ? 'tests' : `tests-${series}`);
+if (!series || !fs.existsSync(TESTS_DIR)) fail(`Unknown series "${series}".`);
 
 const sections = () =>
   fs.readdirSync(TESTS_DIR, { withFileTypes: true })
@@ -29,21 +55,11 @@ const questions = (section) =>
     .map((f) => f.replace(/\.test\.js$/, ''))
     .sort();
 
-const fail = (msg) => {
-  console.error(msg);
-  console.error('Run `node run-tests.js --list` to see what is available.');
-  process.exit(1);
-};
-
-if (args.includes('--help') || args.includes('-h')) {
-  console.log(fs.readFileSync(__filename, 'utf8').split('\n').slice(1).filter((l, i, all) => all.slice(0, i + 1).every((x) => x.startsWith('//'))).map((l) => l.replace(/^\/\/ ?/, '')).join('\n'));
-  process.exit(0);
-}
-
-if (args.includes('--list')) {
+if (list) {
+  console.log(`series ${series}`);
   for (const s of sections()) {
-    console.log(s);
-    for (const q of questions(s)) console.log(`  ${q}`);
+    console.log(`  ${s}`);
+    for (const q of questions(s)) console.log(`    ${q}`);
   }
   process.exit(0);
 }
@@ -54,10 +70,10 @@ let files;
 if (!section) {
   files = sections().flatMap((s) => questions(s).map((q) => path.join(TESTS_DIR, s, `${q}.test.js`)));
 } else {
-  if (!sections().includes(section)) fail(`Unknown section "${section}".`);
+  if (!sections().includes(section)) fail(`Unknown section "${section}" in series ${series}.`);
   const available = questions(section);
   const wanted = names.length ? names.map((n) => n.replace(/\.(test\.)?js$/, '')) : available;
-  for (const n of wanted) if (!available.includes(n)) fail(`No test for "${n}" in section "${section}".`);
+  for (const n of wanted) if (!available.includes(n)) fail(`No test for "${n}" in series ${series}, section "${section}".`);
   files = wanted.map((q) => path.join(TESTS_DIR, section, `${q}.test.js`));
 }
 

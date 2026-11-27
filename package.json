@@ -5,6 +5,10 @@
   "description": "Interview practice questions with unit tests (node:test, no dependencies)",
   "scripts": {
     "test": "node run-tests.js",
-    "test:list": "node run-tests.js --list"
+    "test:list": "node run-tests.js --list",
+    "test:2": "node run-tests.js --series 2",
+    "test:2:list": "node run-tests.js --series 2 --list",
+    "check:unanswered": "node scripts/check-unanswered.js",
+    "setup": "git config core.hooksPath .githooks"
   }
 }

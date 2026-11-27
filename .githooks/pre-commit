@@ -1,0 +1,10 @@
+#!/bin/sh
+# Blocks commits that put answers on main. Enable once per clone with:  npm run setup
+branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+[ "$branch" = "main" ] || exit 0
+node scripts/check-unanswered.js || {
+  echo ""
+  echo "Commit blocked: main must only contain unanswered questions."
+  echo "Switch to your working branch first:  git switch practice"
+  exit 1
+}
