@@ -9,18 +9,52 @@ There are three series. Each one practises the same concepts with different prob
 
 ## Branches
 
-| Branch     | What it holds                                                                 |
-| ---------- | ----------------------------------------------------------------------------- |
-| `main`     | Unanswered questions and tests only. Protected: changes go in by pull request, and CI rejects any filled-in solution. |
-| `practice` | Your work. Solve problems here and commit as often as you like.               |
+Two branches, and changes only ever flow **one way: `main` → `practice`**.
 
-```sh
-git switch practice        # do your work here
-git merge main             # pull in new questions or test fixes from main
+```
+  feature branch ──PR──▶ main ──(automatic sync)──▶ practice
+  (started from main)     │                           │
+                          │  never ◀──────────────────┘  practice holds your solutions
 ```
 
-Once per clone, run `npm run setup`. It turns on a git hook that blocks commits of answers to `main`.
-You can check `main` by hand with `npm run check:unanswered`.
+| Branch     | What it holds                                                                 |
+| ---------- | ----------------------------------------------------------------------------- |
+| `main`     | Unanswered questions, tests and tooling only. Protected: changes go in by pull request, and CI must pass. |
+| `practice` | Your solutions. Solve problems here and commit as often as you like. Never merged into `main`. |
+
+**Solving problems:**
+
+```sh
+git switch practice
+git pull                   # pick up anything synced from main
+# ...solve, commit, push
+```
+
+**Changing questions, tests or tooling** (anything that should be on `main`): start a branch from
+`main`, never from `practice`, and open a pull request into `main`:
+
+```sh
+git switch -c my-change origin/main
+# ...change, commit, push
+gh pr create --base main
+```
+
+When the pull request is merged, the *Sync main into practice* workflow merges `main` into
+`practice` for you. If that merge conflicts, the workflow fails and leaves `practice` alone; merge it
+by hand with `git switch practice && git pull && git merge origin/main`.
+
+**What keeps `practice` out of `main`:**
+
+| Guard | Where | What it stops |
+| ----- | ----- | ------------- |
+| `no-practice-commits` | CI, required on every PR to `main` | A PR from `practice`, or from any branch started from `practice` (any commit made on `practice` is rejected). |
+| `check-unanswered` | CI, required on every PR to `main` | Any filled-in solution, however it got there. |
+| Branch protection | GitHub | Direct pushes to `main`, force-pushes and deleting `main`. |
+| `pre-push` hook | your machine | Pushing `practice` commits to `main`, before it reaches GitHub. |
+| `pre-commit` hook | your machine | Committing answers while on `main`. |
+
+Run `npm run setup` once per clone to turn the hooks on. You can run the checks by hand with
+`npm run check:unanswered` and `npm run check:no-practice`.
 
 ## Linting
 
@@ -53,6 +87,7 @@ tests-2/<section>/<question>.test.js       # series 2 tests
 tests-3/<section>/<question>.test.js       # series 3 tests
 run-tests.js                               # test runner
 scripts/check-unanswered.js                # keeps main free of answers
+scripts/check-no-practice-commits.js       # keeps practice commits out of main
 scripts/test-reporter.js                   # expected vs received output for failing tests
 eslint.config.js                           # lint rules (see Linting above)
 ```

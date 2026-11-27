@@ -11,6 +11,7 @@
     "test:3": "node run-tests.js --series 3",
     "test:3:list": "node run-tests.js --series 3 --list",
     "check:unanswered": "node scripts/check-unanswered.js",
+    "check:no-practice": "node scripts/check-no-practice-commits.js",
     "setup": "git config core.hooksPath .githooks",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
