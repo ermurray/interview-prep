@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 // 1.5 Balanced brackets
 // Difficulty: Easy · Suggested time: 30 minutes
 //
@@ -28,8 +29,26 @@
 // example input: "([)()]"
 // example output: 0
 
+const bracketPairs = {
+  '{': '}',
+  '[': ']',
+  '(': ')',
+};
+
 const balancedBrackets = (str) => {
-  // your solution here
+  if (str.length % 2 !== 0) return 0;
+  const trimmedStr = str.trim();
+
+  const depth = 0;
+  const midIndex = trimmedStr.length / 2 - 1;
+  const firstHalf = trimmedStr.split().slice(0, midIndex + 1);
+
+  for (const [i, char] of firstHalf.entries()) {
+    const fromEnd = -(i + 1);
+    if (str[fromEnd] !== bracketPairs[char]) return 0;
+  }
+
+  return 1;
 };
 
 export { balancedBrackets };
