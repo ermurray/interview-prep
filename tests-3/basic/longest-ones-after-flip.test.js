@@ -14,7 +14,7 @@ test('flip at the end: "1110" -> 4', () => assert.equal(longestOnesAfterFlip('11
 test('two zeros in a row only join one side: "11001111" -> 5', () => assert.equal(longestOnesAfterFlip('11001111'), 5));
 test('best join is not the longest run: "1011011100111" -> 6', () => assert.equal(longestOnesAfterFlip('1011011100111'), 6));
 test('1,000,000 characters with one zero in the middle', () => {
-  const s = '1'.repeat(500000) + '0' + '1'.repeat(499999);
+  const s = `${'1'.repeat(500000)}0${'1'.repeat(499999)}`;
   assert.equal(longestOnesAfterFlip(s), 1000000);
 });
 test('1,000,000 alternating characters -> 3', () => assert.equal(longestOnesAfterFlip('10'.repeat(500000)), 3));

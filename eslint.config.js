@@ -119,6 +119,12 @@ export default [
       'no-promise-executor-return': 'off',
       'no-unused-expressions': ['error', { allowTernary: true }],
       'no-plusplus': 'off',
+      // Fixture classes live next to the tests that use them.
+      'max-classes-per-file': 'off',
+      // Some tests await one step at a time on purpose.
+      'no-await-in-loop': 'off',
+      // Callbacks may refer to variables declared after them (they run later).
+      'no-use-before-define': ['error', { functions: false, classes: true, variables: false }],
     },
   },
 
