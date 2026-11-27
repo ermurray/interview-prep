@@ -31,8 +31,5 @@
 // example input: [1, 2, 3, 4, 5], 2
 // example output: [4, 5, 1, 2, 3]
 
-const rotateArray = (A, K) => {
-  // your solution here
-};
-
-export { rotateArray };
+// Naive approach
+const rotateArray = (array, k) => {

@@ -31,8 +31,20 @@
 // example input: 1041
 // example output: 5
 
-const longestZeroRun = (N) => {
-  // your solution here
+// Naive approach
+const longestZeroRun = (input) => {
+  let longestRun = 0;
+  let currentRun = 0;
+  let stringedInput = input.toString();
+  for (const char of stringedInput) {
+    if (char === '0') {
+      currentRun++;
+    } else {
+      longestRun = Math.max(longestRun, currentRun);
+      currentRun = 0;
+    }
+  }
+  return longestRun;
 };
 
 export { longestZeroRun };
