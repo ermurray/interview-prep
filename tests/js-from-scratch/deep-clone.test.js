@@ -61,3 +61,56 @@ test('shared references stay shared', () => {
   assert.equal(copy.a, copy.b);
   assert.notEqual(copy.a, shared);
 });
+
+// ---- more edge cases ----
+test('a Date at the top level', () => {
+  const d = new Date(5);
+  const copy = deepClone(d);
+  assert.ok(copy instanceof Date);
+  assert.notEqual(copy, d);
+  assert.equal(copy.getTime(), 5);
+});
+
+test('Set values are cloned too', () => {
+  const inner = { x: 1 };
+  const copy = deepClone(new Set([inner]));
+  const [value] = copy;
+  assert.deepEqual(value, inner);
+  assert.notEqual(value, inner);
+});
+
+test('Dates inside arrays', () => {
+  const copy = deepClone([new Date(1), new Date(2)]);
+  assert.ok(copy[0] instanceof Date);
+  assert.equal(copy[1].getTime(), 2);
+});
+
+test('a Map that contains itself', () => {
+  const m = new Map();
+  m.set('self', m);
+  const copy = deepClone(m);
+  assert.equal(copy.get('self'), copy);
+  assert.notEqual(copy, m);
+});
+
+test('a circular array', () => {
+  const a = [1];
+  a.push(a);
+  const copy = deepClone(a);
+  assert.equal(copy[1], copy);
+  assert.equal(copy[0], 1);
+});
+
+test('empty containers', () => {
+  assert.deepEqual(deepClone({}), {});
+  assert.deepEqual(deepClone([]), []);
+  assert.equal(deepClone(new Map()).size, 0);
+});
+
+test('changing the copy does not change the original', () => {
+  const src = { list: [{ n: 1 }] };
+  const copy = deepClone(src);
+  copy.list[0].n = 2;
+  copy.list.push({ n: 3 });
+  assert.deepEqual(src, { list: [{ n: 1 }] });
+});

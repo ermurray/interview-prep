@@ -60,3 +60,27 @@ test('aborting during backoff stops further attempts', async () => {
   assert.equal(f.calls(), callsAtAbort, 'no attempts after abort');
   assert.ok(callsAtAbort < 4);
 });
+
+// ---- more edge cases ----
+test('retries: 0 means a single attempt', async () => {
+  const f = flaky(1);
+  await assert.rejects(retry(f.fn, { retries: 0, backoffMs: 1 }), /fail 1/);
+  assert.equal(f.calls(), 1);
+});
+
+test('resolves with falsy values', async () => {
+  const f = flaky(1, 0);
+  assert.equal(await retry(f.fn, { retries: 2, backoffMs: 1 }), 0);
+});
+
+test('rejects with the last error, not the first', async () => {
+  let n = 0;
+  const fn = async () => { throw new Error(`attempt ${++n}`); };
+  await assert.rejects(retry(fn, { retries: 2, backoffMs: 1 }), /attempt 3/);
+});
+
+test('the first attempt is not delayed', async () => {
+  const start = Date.now();
+  await retry(async () => 'now', { retries: 3, backoffMs: 500 });
+  assert.ok(Date.now() - start < 100);
+});

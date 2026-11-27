@@ -22,3 +22,16 @@ test('preserves `this` for the first function', () => {
   const obj = { base: 10, run: pipe(function (x) { return this.base + x; }, double) };
   assert.equal(obj.run(1), 22);
 });
+
+// ---- more edge cases ----
+test('compose with three functions runs right to left', () =>
+  assert.equal(compose((s) => s + 'c', (s) => s + 'b', (s) => s + 'a')(''), 'abc'));
+test('pipe with three functions runs left to right', () =>
+  assert.equal(pipe((s) => s + 'a', (s) => s + 'b', (s) => s + 'c')(''), 'abc'));
+test('compose with one function passes every argument', () => assert.equal(compose((a, b, c) => a + b + c)(1, 2, 3), 6));
+test('the composed function can be reused', () => {
+  const f = pipe(add1, double);
+  assert.equal(f(1), 4);
+  assert.equal(f(2), 6);
+});
+test('falsy values flow through', () => assert.equal(pipe((x) => x, (x) => x)(0), 0));

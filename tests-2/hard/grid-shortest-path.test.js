@@ -18,3 +18,21 @@ test('1000 x 1000 open grid is fast', () => {
   assert.equal(gridShortestPath(g), 1998);
   assert.ok(Date.now() - start < 2000);
 });
+
+// ---- more edge cases ----
+test('1x1 wall -> -1', () => assert.equal(gridShortestPath(['#']), -1));
+test('single row blocked in the middle -> -1', () => assert.equal(gridShortestPath(['..#..']), -1));
+test('single column', () => assert.equal(gridShortestPath(['.', '.', '.']), 2));
+test('route must go back up', () =>
+  assert.equal(gridShortestPath([
+    '.#...',
+    '.#.#.',
+    '...#.',
+  ]), 10));
+test('fully walled-off target', () => assert.equal(gridShortestPath(['...', '.##', '.#.']), -1));
+test('takes the shorter of two routes', () =>
+  assert.equal(gridShortestPath([
+    '....',
+    '.##.',
+    '....',
+  ]), 5));

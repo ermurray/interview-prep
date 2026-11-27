@@ -63,3 +63,26 @@ test('an already-aborted signal rejects without calling fn', async () => {
   await assert.rejects(pollUntil(c.fn, { signal: ac.signal }));
   assert.equal(c.calls(), 0);
 });
+
+// ---- more edge cases ----
+test('falsy results (0, "", false) keep polling', async () => {
+  const results = [0, '', false, null, 'finally'];
+  let i = 0;
+  assert.equal(await pollUntil(() => results[i++], { intervalMs: 1 }), 'finally');
+  assert.equal(i, 5);
+});
+
+test('resolves with the exact truthy value', async () => {
+  const obj = { ready: true };
+  assert.equal(await pollUntil(() => obj, { intervalMs: 1 }), obj);
+});
+
+test('an error after a few falsy results still rejects', async () => {
+  let n = 0;
+  await assert.rejects(pollUntil(() => { if (++n === 3) throw new Error('third'); return null; }, { intervalMs: 1 }), /third/);
+  assert.equal(n, 3);
+});
+
+test('timeout shorter than the interval still times out', async () => {
+  await assert.rejects(pollUntil(() => null, { intervalMs: 1000, timeoutMs: 20 }), (e) => e.name === 'TimeoutError');
+});

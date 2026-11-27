@@ -3,7 +3,8 @@
 //  - trailing (default): fn runs once, `wait` ms after the LAST call of a burst, with the last call's args/this.
 //  - leading: true: fn runs immediately on the FIRST call of a burst; further calls within `wait` are ignored
 //    (and keep extending the quiet period). After `wait` ms of quiet, the next call fires immediately again.
-//  - .cancel() drops any pending call.
+//  - .cancel() drops any pending call. In leading mode it also ends the burst, so the next call fires
+//    immediately.
 // example input:  const d = debounce(log, 100); d('a'); d('b'); d('c');   // then 100ms of quiet
 // example output: log is called once, with 'c'
 

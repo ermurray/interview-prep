@@ -51,3 +51,30 @@ test('rejects if a task rejects', async () => {
   const { task } = tracker();
   await assert.rejects(runWithLimit([task(5, 'ok'), task(5, 'nope', true)], 2), /nope/);
 });
+
+// ---- more edge cases ----
+test('limit 1 runs tasks one at a time, in order', async () => {
+  const { task, peak } = tracker();
+  assert.deepEqual(await runWithLimit([task(10, 'a'), task(1, 'b'), task(5, 'c')], 1), ['a', 'b', 'c']);
+  assert.equal(peak(), 1);
+});
+
+test('limit equal to the task count runs everything at once', async () => {
+  const { task, peak } = tracker();
+  await runWithLimit([task(10, 1), task(10, 2), task(10, 3)], 3);
+  assert.equal(peak(), 3);
+});
+
+test('rejects with the task error itself', async () => {
+  const err = new Error('specific');
+  await assert.rejects(runWithLimit([() => Promise.reject(err)], 1), (e) => e === err);
+});
+
+test('a slot freed by a fast task is reused straight away', async () => {
+  const started = [];
+  const task = (name, ms) => () => { started.push(name); return new Promise((r) => setTimeout(() => r(name), ms)); };
+  const p = runWithLimit([task('slow', 50), task('fast', 5), task('next', 5)], 2);
+  await new Promise((r) => setTimeout(r, 20));
+  assert.deepEqual(started, ['slow', 'fast', 'next'], '"next" starts once "fast" finishes, not after "slow"');
+  await p;
+});

@@ -52,3 +52,42 @@ test('preserves `this`', (t) => {
   t.mock.timers.tick(100);
   assert.deepEqual(seen, [obj, obj]);
 });
+
+// ---- more edge cases ----
+test('after a quiet window, the next call runs immediately again', (t) => {
+  useFakeTimers(t);
+  const fn = t.mock.fn();
+  const th = throttle(fn, 100);
+  th(1);
+  t.mock.timers.tick(150);
+  th(2);
+  assert.equal(fn.mock.callCount(), 2);
+  assert.deepEqual(fn.mock.calls[1].arguments, [2]);
+});
+
+test('the trailing call uses the latest arguments', (t) => {
+  useFakeTimers(t);
+  const fn = t.mock.fn();
+  const th = throttle(fn, 100);
+  th('a'); th('b'); th('c'); th('d');
+  t.mock.timers.tick(100);
+  assert.deepEqual(fn.mock.calls.map((c) => c.arguments[0]), ['a', 'd']);
+});
+
+test('two throttled functions are independent', (t) => {
+  useFakeTimers(t);
+  const a = t.mock.fn();
+  const b = t.mock.fn();
+  const ta = throttle(a, 100);
+  const tb = throttle(b, 100);
+  ta(); tb();
+  assert.equal(a.mock.callCount(), 1);
+  assert.equal(b.mock.callCount(), 1);
+});
+
+test('passes every argument through', (t) => {
+  useFakeTimers(t);
+  const fn = t.mock.fn();
+  throttle(fn, 100)(1, 2, 3);
+  assert.deepEqual(fn.mock.calls[0].arguments, [1, 2, 3]);
+});

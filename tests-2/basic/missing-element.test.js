@@ -14,3 +14,16 @@ test('large input', () => {
   for (let i = 1; i <= 100001; i++) if (i !== 77777) a.push(i);
   assert.equal(missingElement(a), 77777);
 });
+
+// ---- more edge cases ----
+test('[2] -> 1', () => assert.equal(missingElement([2]), 1));
+test('missing in the middle', () => assert.equal(missingElement([1, 2, 4, 5]), 3));
+test('reverse order', () => assert.equal(missingElement([5, 4, 2, 1]), 3));
+test('large input missing N + 1', () => {
+  const a = Array.from({ length: 100000 }, (_, i) => i + 1);
+  assert.equal(missingElement(a), 100001);
+});
+test('large input missing 1', () => {
+  const a = Array.from({ length: 100000 }, (_, i) => i + 2);
+  assert.equal(missingElement(a), 1);
+});

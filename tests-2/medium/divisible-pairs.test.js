@@ -19,3 +19,10 @@ test('just over the cap -> -1', () => {
   // 44722 equal values: C(44722, 2) = 1,000,006,281 pairs
   assert.equal(divisiblePairs(new Array(44722).fill(4), 2), -1);
 });
+
+// ---- more edge cases ----
+test('K larger than every value', () => assert.equal(divisiblePairs([1, 2, 3], 100), 0));
+test('K = 2: odds pair with odds, evens with evens', () => assert.equal(divisiblePairs([1, 3, 5, 2, 4], 2), 4));
+test('zeros pair with each other', () => assert.equal(divisiblePairs([0, 0, 0], 5), 3));
+test('values that wrap the remainder', () => assert.equal(divisiblePairs([7, 3], 10), 1));
+test('large K equal to a sum', () => assert.equal(divisiblePairs([999999999, 1], 1000000000), 1));

@@ -14,3 +14,14 @@ test('container vs leaf reports only that path', () =>
 test('array vs object reports only that path', () => assert.deepEqual(diffPaths({ a: [1] }, { a: { 0: 1 } }), ['a']));
 test('array length change', () => assert.deepEqual(diffPaths({ l: [1, 2, 3] }, { l: [1] }), ['l.1', 'l.2']));
 test('result is sorted', () => assert.deepEqual(diffPaths({ z: 1, a: 1, m: 1 }, { z: 2, a: 2, m: 2 }), ['a', 'm', 'z']));
+
+// ---- more edge cases ----
+test('two empty objects -> []', () => assert.deepEqual(diffPaths({}, {}), []));
+test('top-level arrays use index paths', () => assert.deepEqual(diffPaths([1, 2, 3], [1, 5, 3]), ['1']));
+test('paths through arrays of objects', () =>
+  assert.deepEqual(diffPaths({ a: [{ b: 1 }, { b: 2 }] }, { a: [{ b: 1 }, { b: 3 }] }), ['a.1.b']));
+test('a key removed from b', () => assert.deepEqual(diffPaths({ a: 1, b: 2 }, { a: 1 }), ['b']));
+test('a nested object added in b reports only its own path', () =>
+  assert.deepEqual(diffPaths({ a: 1 }, { a: 1, b: { c: { d: 1 } } }), ['b']));
+test('null vs object reports that path', () => assert.deepEqual(diffPaths({ a: null }, { a: {} }), ['a']));
+test('undefined vs missing key is a difference', () => assert.deepEqual(diffPaths({ a: undefined }, {}), ['a']));
