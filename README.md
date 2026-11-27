@@ -22,6 +22,26 @@ git merge main             # pull in new questions or test fixes from main
 Once per clone, run `npm run setup`. It turns on a git hook that blocks commits of answers to `main`.
 You can check `main` by hand with `npm run check:unanswered`.
 
+## Linting
+
+```sh
+npm install          # once per clone: installs ESLint (dev only, the tests need nothing)
+npm run lint         # check everything
+npm run lint:fix     # fix what can be fixed automatically
+npx eslint prep-questions/basic/rotate-array.js   # one file
+```
+
+The rules live in `eslint.config.js` and are tuned per kind of file:
+
+| Files | What's different |
+| ----- | ---------------- |
+| `prep-questions*/` | Unused **parameters** are allowed (stubs don't use them yet), but unused local variables are not. `getter-return` is off because stub getters are empty; the tests check what your getters return. Each file **must** keep a named `export { ... }` (`local/require-named-export`) and must not use `export default`, because the tests load solutions with `const { fn } = await load(...)`. `no-unused-modules` and `prefer-default-export` are off: static analysis can't see those dynamic imports, and each question has one named export by design. |
+| `tests*/` | Parameters kept only for arity (like `function (_a, _b)`) must start with `_`. |
+| `run-tests.js`, `scripts/` | `console` is allowed. |
+| everything | ESLint recommended + import-x recommended, `.js` extensions required on relative imports (Node ESM needs them), no mutable exports, `===` except `== null`, no `var`, `prefer-const` (warning). |
+
+CI runs the linter on every pull request to `main`, alongside the unanswered check.
+
 ## Layout
 
 ```
@@ -31,6 +51,8 @@ tests/<section>/<question>.test.js         # series 1 tests
 tests-2/<section>/<question>.test.js       # series 2 tests
 run-tests.js                               # test runner
 scripts/check-unanswered.js                # keeps main free of answers
+scripts/test-reporter.js                   # expected vs received output for failing tests
+eslint.config.js                           # lint rules (see Linting above)
 ```
 
 | Section           | Series 1                                            | Series 2                                                  |
