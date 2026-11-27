@@ -1,4 +1,5 @@
 // 2.8 EventEmitter. Implement on, off, once, emit. Removing a listener during emit must not skip others.
+//  A listener added during emit is not called until the next emit.
 // example input:
 //   const e = new EventEmitter();
 //   e.on('greet', name => console.log('hi', name));

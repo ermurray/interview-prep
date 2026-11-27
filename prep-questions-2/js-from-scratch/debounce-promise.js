@@ -6,7 +6,8 @@
 //     arguments and this.
 //   - Every promise returned during that burst resolves with fn's result (or rejects with its error).
 //     fn may return a plain value or a promise.
-//   - A call after the burst has finished starts a new burst with its own result.
+//   - A burst ends when its timer fires. A call after that starts a new burst with its own result, even
+//     if fn from the previous burst is still running.
 // Use setTimeout for timing (the tests mock it).
 //
 // example input:

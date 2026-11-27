@@ -70,3 +70,48 @@ test('tasks can be added after the queue went idle', async () => {
   await q.onIdle();
   assert.equal(await q.add(() => 2), 2);
 });
+
+// ---- more edge cases ----
+test('concurrency 1 runs tasks strictly one after another', async () => {
+  const q = createTaskQueue(1);
+  let running = 0;
+  let peak = 0;
+  const task = async () => { running++; peak = Math.max(peak, running); await wait(2); running--; };
+  await Promise.all([q.add(task), q.add(task), q.add(task)]);
+  assert.equal(peak, 1);
+});
+
+test('tasks that return plain values', async () => {
+  const q = createTaskQueue(2);
+  assert.deepEqual(await Promise.all([q.add(() => 1), q.add(() => 'two')]), [1, 'two']);
+});
+
+test('a task that throws synchronously rejects only its own promise', async () => {
+  const q = createTaskQueue(1);
+  const bad = q.add(() => { throw new Error('sync'); });
+  const good = q.add(() => 'still runs');
+  await assert.rejects(bad, /sync/);
+  assert.equal(await good, 'still runs');
+});
+
+test('onIdle can be awaited more than once', async () => {
+  const q = createTaskQueue(2);
+  q.add(() => wait(5));
+  await Promise.all([q.onIdle(), q.onIdle()]);
+  q.add(() => wait(5));
+  await q.onIdle();
+  assert.equal(q.size, 0);
+});
+
+test('onIdle waits for tasks added while running', async () => {
+  const q = createTaskQueue(1);
+  const done = [];
+  q.add(async () => {
+    await wait(5);
+    q.add(async () => { await wait(5); done.push('child'); });
+    done.push('parent');
+  });
+  await wait(1);
+  await q.onIdle();
+  assert.deepEqual(done, ['parent', 'child']);
+});

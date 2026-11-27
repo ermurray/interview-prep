@@ -55,3 +55,45 @@ test('100,000 operations finish quickly (O(1) per op)', () => {
   assert.equal(c.get(99999), 99999);
   assert.equal(c.get(0), -1);
 });
+
+// ---- more edge cases ----
+test('get on a missing key does not change the order', () => {
+  const c = new LRUCache(2);
+  c.put('a', 1);
+  c.put('b', 2);
+  c.get('zzz');
+  c.put('c', 3); // evicts a, the least recently used
+  assert.equal(c.get('a'), -1);
+  assert.equal(c.get('b'), 2);
+});
+
+test('number and string keys are different', () => {
+  const c = new LRUCache(2);
+  c.put(1, 'number');
+  c.put('1', 'string');
+  assert.equal(c.get(1), 'number');
+  assert.equal(c.get('1'), 'string');
+});
+
+test('updating a value does not grow the cache', () => {
+  const c = new LRUCache(2);
+  c.put('a', 1);
+  c.put('a', 2);
+  c.put('a', 3);
+  c.put('b', 4);
+  assert.equal(c.get('a'), 3);
+  assert.equal(c.get('b'), 4);
+});
+
+test('evicts in the right order over many inserts', () => {
+  const c = new LRUCache(3);
+  for (let i = 0; i < 10; i++) c.put(i, i);
+  assert.deepEqual([c.get(6), c.get(7), c.get(8), c.get(9)], [-1, 7, 8, 9]);
+});
+
+test('stores objects as values', () => {
+  const c = new LRUCache(1);
+  const v = { deep: [1, 2] };
+  c.put('k', v);
+  assert.equal(c.get('k'), v);
+});

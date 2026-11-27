@@ -107,3 +107,54 @@ test('MyPromise: resolves only once', async () => {
 test('MyPromise: works with await (thenable)', async () => {
   assert.equal(await withTimeout((async () => await new MyPromise((r) => r('awaited')))()), 'awaited');
 });
+
+// ---- more edge cases ----
+test('bind: bound arguments come before call-time arguments', () => {
+  function list(...args) { return args; }
+  assert.deepEqual(myBind.call(list, null, 1, 2)(3, 4), [1, 2, 3, 4]);
+});
+test('reduce: an explicit undefined initial value is used', () =>
+  assert.deepEqual(myReduce.call([1], (acc, x) => [acc, x], undefined), [undefined, 1]));
+test('reduce: one element and no initial value returns it without calling back', () => {
+  let calls = 0;
+  assert.equal(myReduce.call([7], () => { calls++; }), 7);
+  assert.equal(calls, 0);
+});
+test('reduce: builds an object', () =>
+  assert.deepEqual(myReduce.call(['a', 'b'], (acc, k, i) => ({ ...acc, [k]: i }), {}), { a: 0, b: 1 }));
+test('MyPromise: then without handlers passes the value through', async () => {
+  const value = await settle((done) => {
+    new MyPromise((r) => r(5)).then(null).then(undefined).then(done);
+  });
+  assert.equal(value, 5);
+});
+test('MyPromise: rejection passes through then() without an error handler', async () => {
+  const value = await settle((done) => {
+    new MyPromise((_, rej) => rej('why')).then((x) => x).then(null, done);
+  });
+  assert.equal(value, 'why');
+});
+test('MyPromise: several then() calls on one promise all run, in order', async () => {
+  const seen = [];
+  await settle((done) => {
+    const p = new MyPromise((r) => setTimeout(() => r('v'), 5));
+    p.then((v) => seen.push(`a:${v}`));
+    p.then((v) => { seen.push(`b:${v}`); done(); });
+  });
+  assert.deepEqual(seen, ['a:v', 'b:v']);
+});
+test('MyPromise: catch() returns a value that continues the chain', async () => {
+  const value = await settle((done) => {
+    new MyPromise((_, rej) => rej(new Error('x'))).catch(() => 'recovered').then(done);
+  });
+  assert.equal(value, 'recovered');
+});
+test('MyPromise: then() on an already-settled promise still runs asynchronously', async () => {
+  const order = [];
+  const p = new MyPromise((r) => r());
+  await settle((done) => {
+    p.then(() => { order.push('then'); done(); });
+    order.push('sync');
+  });
+  assert.deepEqual(order, ['sync', 'then']);
+});

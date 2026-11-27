@@ -34,3 +34,22 @@ test('any: all rejected -> AggregateError with reasons in input order', async ()
 });
 test('any: empty input rejects with AggregateError', async () =>
   assert.rejects(promiseAny([]), (e) => e instanceof AggregateError));
+
+// ---- more edge cases ----
+test('allSettled: thenables are adopted', async () =>
+  assert.deepEqual(await promiseAllSettled([{ then: (r) => r('t') }]), [{ status: 'fulfilled', value: 't' }]));
+test('allSettled: mixed timing keeps input order', async () => {
+  const out = await promiseAllSettled([delay(15, 'slow'), delay(1, 'fast', true), 'now']);
+  assert.deepEqual(out.map((r) => r.value ?? r.reason), ['slow', 'fast', 'now']);
+});
+test('any: a fulfilment after several rejections still wins', async () =>
+  assert.equal(await promiseAny([delay(1, 'a', true), delay(5, 'b', true), delay(10, 'c')]), 'c'));
+test('any: the first to fulfil wins, not the first in the list', async () =>
+  assert.equal(await promiseAny([delay(20, 'first in list'), delay(5, 'first to finish')]), 'first to finish'));
+test('any: accepts a Set', async () => assert.equal(await promiseAny(new Set([Promise.reject('x'), 'y'])), 'y'));
+test('any: errors are in input order even when they settle out of order', async () => {
+  await assert.rejects(promiseAny([delay(15, 1, true), delay(5, 2, true), delay(10, 3, true)]), (e) => {
+    assert.deepEqual(e.errors, [1, 2, 3]);
+    return true;
+  });
+});

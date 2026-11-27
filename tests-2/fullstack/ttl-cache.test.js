@@ -84,3 +84,61 @@ test('expired entries are dropped before evicting live ones', () => {
   assert.equal(cache.get('live'), 1, 'live entry was kept');
   assert.equal(cache.get('new'), 3);
 });
+
+// ---- more edge cases ----
+test('maxSize 1', () => {
+  const c = clock();
+  const cache = new TTLCache({ ttlMs: 1000, maxSize: 1, now: c.now });
+  cache.set('a', 1);
+  cache.set('b', 2);
+  assert.equal(cache.get('a'), undefined);
+  assert.equal(cache.get('b'), 2);
+});
+
+test('delete on an expired key returns false', () => {
+  const c = clock();
+  const cache = new TTLCache({ ttlMs: 10, now: c.now });
+  cache.set('a', 1);
+  c.advance(10);
+  assert.equal(cache.delete('a'), false);
+});
+
+test('has() does not count as a use', () => {
+  const c = clock();
+  const cache = new TTLCache({ ttlMs: 1000, maxSize: 2, now: c.now });
+  cache.set('a', 1);
+  cache.set('b', 2);
+  cache.has('a');     // does not refresh a
+  cache.set('c', 3);  // evicts a, the least recently used
+  assert.equal(cache.has('a'), false);
+  assert.equal(cache.has('b'), true);
+});
+
+test('updating a key at the size limit does not evict anything', () => {
+  const c = clock();
+  const cache = new TTLCache({ ttlMs: 1000, maxSize: 2, now: c.now });
+  cache.set('a', 1);
+  cache.set('b', 2);
+  cache.set('a', 10);
+  assert.equal(cache.get('a'), 10);
+  assert.equal(cache.get('b'), 2);
+});
+
+test('size is 0 for a new cache and after everything expires', () => {
+  const c = clock();
+  const cache = new TTLCache({ ttlMs: 5, now: c.now });
+  assert.equal(cache.size, 0);
+  cache.set('a', 1);
+  cache.set('b', 2);
+  c.advance(5);
+  assert.equal(cache.size, 0);
+});
+
+test('an expired key can be set again', () => {
+  const c = clock();
+  const cache = new TTLCache({ ttlMs: 5, now: c.now });
+  cache.set('a', 1);
+  c.advance(5);
+  cache.set('a', 2);
+  assert.equal(cache.get('a'), 2);
+});

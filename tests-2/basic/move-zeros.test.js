@@ -19,3 +19,11 @@ test('large input is O(N)', () => {
   assert.equal(out[50000], 0);
   assert.equal(out[99999], 0);
 });
+
+// ---- more edge cases ----
+test('single zero', () => assert.deepEqual(moveZeros([0]), [0]));
+test('single non-zero', () => assert.deepEqual(moveZeros([5]), [5]));
+test('zeros already at the end', () => assert.deepEqual(moveZeros([1, 2, 0, 0]), [1, 2, 0, 0]));
+test('zeros all at the start', () => assert.deepEqual(moveZeros([0, 0, 0, 1, 2]), [1, 2, 0, 0, 0]));
+test('duplicates keep their order', () => assert.deepEqual(moveZeros([1, 0, 1, 0, 2]), [1, 1, 2, 0, 0]));
+test('result has the same length', () => assert.equal(moveZeros([0, 3, 0, 0, 7, 0]).length, 6));

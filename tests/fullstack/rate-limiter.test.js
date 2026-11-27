@@ -82,3 +82,40 @@ test('middleware uses a custom key function', () => {
   mw({ ip: 'same', user: 'u2' }, res, () => nextCalls++);
   assert.equal(nextCalls, 2);
 });
+
+// ---- more edge cases ----
+test('after a full window passes, the full limit is available again', () => {
+  const c = clock();
+  const rl = new RateLimiter({ limit: 3, windowMs: 1000, now: c.now });
+  for (let i = 0; i < 3; i++) rl.allow('a');
+  assert.equal(rl.allow('a'), false);
+  c.advance(1000);
+  assert.deepEqual([rl.allow('a'), rl.allow('a'), rl.allow('a'), rl.allow('a')], [true, true, true, false]);
+});
+
+test('limit 1 with a 1ms window', () => {
+  const c = clock();
+  const rl = new RateLimiter({ limit: 1, windowMs: 1, now: c.now });
+  assert.equal(rl.allow('a'), true);
+  assert.equal(rl.allow('a'), false);
+  c.advance(1);
+  assert.equal(rl.allow('a'), true);
+});
+
+test('many keys at once', () => {
+  const c = clock();
+  const rl = new RateLimiter({ limit: 1, windowMs: 1000, now: c.now });
+  for (let i = 0; i < 1000; i++) assert.equal(rl.allow(`user-${i}`), true);
+  assert.equal(rl.allow('user-500'), false);
+});
+
+test('blocked requests do not reach the next middleware', () => {
+  const rl = new RateLimiter({ limit: 0, windowMs: 1000, now: () => 0 });
+  const mw = rateLimitMiddleware(rl);
+  let nextCalled = false;
+  let status;
+  const res = { status(code) { status = code; return this; }, send() { return this; } };
+  mw({ ip: '1.1.1.1' }, res, () => { nextCalled = true; });
+  assert.equal(nextCalled, false);
+  assert.equal(status, 429);
+});
