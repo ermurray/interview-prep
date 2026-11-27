@@ -45,7 +45,7 @@ test('the abort listener is removed after the delay resolves', async () => {
   const ac = new AbortController();
   let added = 0;
   let removed = 0;
-  const signal = ac.signal;
+  const { signal } = ac;
   const add = signal.addEventListener.bind(signal);
   const remove = signal.removeEventListener.bind(signal);
   signal.addEventListener = (...args) => { added++; return add(...args); };

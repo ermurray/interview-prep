@@ -13,7 +13,7 @@ test('letter only just outside the range does not count', () =>
   assert.deepEqual(minimalImpact('ATTTA', [1], [3]), [4]));
 test('letter at the range edges counts', () => assert.deepEqual(minimalImpact('TATAT', [1, 3], [1, 4]), [1, 1]));
 test('performance: N = 100,000, M = 50,000 full-range queries', () => {
-  const s = 'T'.repeat(99999) + 'A';
+  const s = `${'T'.repeat(99999)}A`;
   const p = new Array(50000).fill(0);
   const q = new Array(50000).fill(99998);
   const start = Date.now();

@@ -15,5 +15,5 @@ test('three copies are not unique', () => assert.equal(firstUniqueIndex('aaab'),
 test('100,000 characters, unique one at the end', () => {
   let s = '';
   for (let i = 0; i < 99999; i++) s += String.fromCharCode(97 + (i % 25)); // a..y
-  assert.equal(firstUniqueIndex(s + 'z'), 99999);
+  assert.equal(firstUniqueIndex(`${s}z`), 99999);
 });
