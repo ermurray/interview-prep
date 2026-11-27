@@ -7,6 +7,9 @@
 //     // your solution here
 //   };
 //
+// Scaffolding that is part of the question (e.g. a placeholder constant) is allowed when the line
+// ends with a `// provided` comment.
+//
 // Usage: node scripts/check-unanswered.js            (checks every prep-questions*/**/*.js)
 //        node scripts/check-unanswered.js file.js ...  (checks just these files)
 import fs from 'node:fs';
@@ -26,8 +29,8 @@ const questionFiles = () =>
 const findAnswer = (source) => {
   const lines = source
     .split('\n')
-    .map((l, i) => ({ n: i + 1, text: l.replace(/\/\/.*$/, '').trim() }))
-    .filter((l) => l.text);
+    .map((l, i) => ({ n: i + 1, text: l.replace(/\/\/.*$/, '').trim(), provided: /\/\/\s*provided\b/.test(l) }))
+    .filter((l) => l.text && !l.provided);
   let classDepth = 0;
   for (let i = 0; i < lines.length; i++) {
     const { n, text } = lines[i];
