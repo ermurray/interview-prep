@@ -1,0 +1,37 @@
+name: Sync main into practice
+
+# One-way flow: whenever main changes, merge it into practice so practice always has the latest
+# questions, tests and tooling. Nothing ever flows from practice back to main.
+# If the merge conflicts, this job fails and practice is left untouched: merge it by hand with
+#   git switch practice && git pull && git merge origin/main
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-practice
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: practice
+          fetch-depth: 0
+      - name: Merge main into practice
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git merge-base --is-ancestor origin/main HEAD; then
+            echo "practice already has everything from main."
+            exit 0
+          fi
+          git merge --no-edit origin/main -m "Merge main into practice (automatic sync)"
+          git push origin practice

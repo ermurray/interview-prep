@@ -1,4 +1,4 @@
-name: Questions stay unanswered
+name: Main guards
 
 on:
   pull_request:
@@ -15,6 +15,18 @@ jobs:
         with:
           node-version: 24
       - run: node scripts/check-unanswered.js
+
+  # practice holds solutions: changes only flow main -> practice, never back.
+  no-practice-commits:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history of every branch, so practice can be compared
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node scripts/check-no-practice-commits.js HEAD origin/main
 
   lint:
     runs-on: ubuntu-latest
