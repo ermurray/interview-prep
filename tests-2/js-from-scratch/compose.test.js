@@ -25,9 +25,9 @@ test('preserves `this` for the first function', () => {
 
 // ---- more edge cases ----
 test('compose with three functions runs right to left', () =>
-  assert.equal(compose((s) => s + 'c', (s) => s + 'b', (s) => s + 'a')(''), 'abc'));
+  assert.equal(compose((s) => `${s}c`, (s) => `${s}b`, (s) => `${s}a`)(''), 'abc'));
 test('pipe with three functions runs left to right', () =>
-  assert.equal(pipe((s) => s + 'a', (s) => s + 'b', (s) => s + 'c')(''), 'abc'));
+  assert.equal(pipe((s) => `${s}a`, (s) => `${s}b`, (s) => `${s}c`)(''), 'abc'));
 test('compose with one function passes every argument', () => assert.equal(compose((a, b, c) => a + b + c)(1, 2, 3), 6));
 test('the composed function can be reused', () => {
   const f = pipe(add1, double);

@@ -1,7 +1,8 @@
 # Interview practice
 
 Practice questions from the *Senior Frontend / Fullstack Interview Practice Set*, each with unit tests.
-Uses ES modules and Node's built-in test runner, so there is nothing to install (Node 20+; developed on Node 24).
+Uses ES modules and Node's built-in test runner, so the tests need nothing installed (Node 20+; developed on Node 24).
+Linting and formatting need `npm install` and Node 24+ (see [Linting](#linting)).
 
 There are three series. Each one practises the same concepts with different problems (for example,
 *unpaired element* → *missing element* → *duplicate value*, or *skyline blocks* → *largest rectangle*
@@ -59,20 +60,24 @@ Run `npm run setup` once per clone to turn the hooks on. You can run the checks 
 ## Linting
 
 ```sh
-npm install          # once per clone: installs ESLint (dev only, the tests need nothing)
+npm install          # once per clone: installs ESLint + Prettier (dev only, the tests need nothing)
 npm run lint         # check everything
 npm run lint:fix     # fix what can be fixed automatically
+npm run format       # format with Prettier (Airbnb style: 2 spaces, single quotes, 100 cols)
 npx eslint prep-questions/basic/rotate-array.js   # one file
 ```
 
-The rules live in `eslint.config.js` and are tuned per kind of file:
+The rules live in `eslint.config.js`. The base is the
+[Airbnb style guide](https://github.com/airbnb/javascript) (via `eslint-config-airbnb-extended`),
+with `eslint-config-prettier` last so formatting is left to Prettier. On top of that the rules are
+tuned per kind of file:
 
 | Files | What's different |
 | ----- | ---------------- |
-| `prep-questions*/` | Unused **parameters** are allowed (stubs don't use them yet), but unused local variables are not. `getter-return` is off because stub getters are empty; the tests check what your getters return. Each file **must** keep a named `export { ... }` (`local/require-named-export`) and must not use `export default`, because the tests load solutions with `const { fn } = await load(...)`. Scaffolding that is part of a question (like series 3's placeholder `_`) is marked `// provided` so the unanswered check allows it. `no-unused-modules` and `prefer-default-export` are off: static analysis can't see those dynamic imports, and each question has one named export by design. |
-| `tests*/` | Parameters kept only for arity (like `function (_a, _b)`) must start with `_`. |
-| `run-tests.js`, `scripts/` | `console` is allowed. |
-| everything | ESLint recommended + import-x recommended, `.js` extensions required on relative imports (Node ESM needs them), no mutable exports, `===` except `== null`, no `var`, `prefer-const` (warning). |
+| `prep-questions*/` | Unused **parameters** are allowed (stubs don't use them yet), but unused local variables are not. `getter-return`, `no-useless-constructor` and `class-methods-use-this` are off because stubs are empty; the tests check what your code returns. Each file **must** keep a named `export { ... }` (`local/require-named-export`) and must not use `export default`, because the tests load solutions with `const { fn } = await load(...)`. Scaffolding that is part of a question (like series 3's placeholder `_`) is marked `// provided` so the unanswered check allows it. `no-unused-modules` and `prefer-default-export` are off: static analysis can't see those dynamic imports, and each question has one named export by design. |
+| `tests*/` | Parameters kept only for arity (like `function (_a, _b)`) must start with `_`. Rules that would ban deliberate fixtures are off: `no-extend-native` (polyfill tests), `prefer-promise-reject-errors`, `no-promise-executor-return`, `no-plusplus`, `max-classes-per-file` and `no-await-in-loop`. `no-use-before-define` allows callbacks that use a variable declared after them. |
+| `run-tests.js`, `scripts/` | CLI scripts: `console`, shebangs, sync `fs` calls, `process.exit`, `continue` and `++` are allowed. |
+| everything | Airbnb base + Node rules, `.js` extensions required on relative imports (Node ESM needs them, unlike Airbnb's default), no mutable exports, `===` except `== null`, no `var`, `prefer-const` (warning). `no-restricted-syntax` (Airbnb's ban on `for...of`) is a warning, not an error. |
 
 CI runs the linter on every pull request to `main`, alongside the unanswered check.
 
@@ -90,6 +95,7 @@ scripts/check-unanswered.js                # keeps main free of answers
 scripts/check-no-practice-commits.js       # keeps practice commits out of main
 scripts/test-reporter.js                   # expected vs received output for failing tests
 eslint.config.js                           # lint rules (see Linting above)
+.prettierrc.json                           # formatting rules
 ```
 
 | Section           | Series 1                                            | Series 2                                                  | Series 3                                                          |
