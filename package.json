@@ -1,0 +1,10 @@
+{
+  "name": "interview-prep",
+  "private": true,
+  "type": "module",
+  "description": "Interview practice questions with unit tests (node:test, no dependencies)",
+  "scripts": {
+    "test": "node run-tests.js",
+    "test:list": "node run-tests.js --list"
+  }
+}
