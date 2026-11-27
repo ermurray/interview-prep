@@ -3,9 +3,9 @@
 Practice questions from the *Senior Frontend / Fullstack Interview Practice Set*, each with unit tests.
 Uses ES modules and Node's built-in test runner, so there is nothing to install (Node 20+; developed on Node 24).
 
-There are two series. Series 2 practises the same concepts as series 1 with different problems
-(for example, *missing element* instead of *unpaired element*, *largest rectangle* instead of
-*skyline blocks*). Each series 2 question names its series 1 counterpart.
+There are three series. Each one practises the same concepts with different problems (for example,
+*unpaired element* → *missing element* → *duplicate value*, or *skyline blocks* → *largest rectangle*
+→ *sum of slice minimums*). Each question in series 2 and 3 names its counterparts in the earlier series.
 
 ## Branches
 
@@ -35,7 +35,7 @@ The rules live in `eslint.config.js` and are tuned per kind of file:
 
 | Files | What's different |
 | ----- | ---------------- |
-| `prep-questions*/` | Unused **parameters** are allowed (stubs don't use them yet), but unused local variables are not. `getter-return` is off because stub getters are empty; the tests check what your getters return. Each file **must** keep a named `export { ... }` (`local/require-named-export`) and must not use `export default`, because the tests load solutions with `const { fn } = await load(...)`. `no-unused-modules` and `prefer-default-export` are off: static analysis can't see those dynamic imports, and each question has one named export by design. |
+| `prep-questions*/` | Unused **parameters** are allowed (stubs don't use them yet), but unused local variables are not. `getter-return` is off because stub getters are empty; the tests check what your getters return. Each file **must** keep a named `export { ... }` (`local/require-named-export`) and must not use `export default`, because the tests load solutions with `const { fn } = await load(...)`. Scaffolding that is part of a question (like series 3's placeholder `_`) is marked `// provided` so the unanswered check allows it. `no-unused-modules` and `prefer-default-export` are off: static analysis can't see those dynamic imports, and each question has one named export by design. |
 | `tests*/` | Parameters kept only for arity (like `function (_a, _b)`) must start with `_`. |
 | `run-tests.js`, `scripts/` | `console` is allowed. |
 | everything | ESLint recommended + import-x recommended, `.js` extensions required on relative imports (Node ESM needs them), no mutable exports, `===` except `== null`, no `var`, `prefer-const` (warning). |
@@ -47,25 +47,27 @@ CI runs the linter on every pull request to `main`, alongside the unanswered che
 ```
 prep-questions/<section>/<question>.js     # series 1: question, examples, your solution (exported)
 prep-questions-2/<section>/<question>.js   # series 2
+prep-questions-3/<section>/<question>.js   # series 3
 tests/<section>/<question>.test.js         # series 1 tests
 tests-2/<section>/<question>.test.js       # series 2 tests
+tests-3/<section>/<question>.test.js       # series 3 tests
 run-tests.js                               # test runner
 scripts/check-unanswered.js                # keeps main free of answers
 scripts/test-reporter.js                   # expected vs received output for failing tests
 eslint.config.js                           # lint rules (see Linting above)
 ```
 
-| Section           | Series 1                                            | Series 2                                                  |
-| ----------------- | --------------------------------------------------- | --------------------------------------------------------- |
-| `basic`           | 1.1–1.5 Codility-style, easy                        | 1.1–1.5 Codility-style, easy                              |
-| `medium`          | 1.6–1.11 Codility-style, medium                     | 1.6–1.11 Codility-style, medium                           |
-| `hard`            | 1.12–1.16 Codility-style, hard                      | 1.12–1.16 Codility-style, hard                            |
-| `js-from-scratch` | 2.1–2.12 debounce, throttle, promiseAll, polyfills… | 2.1–2.12 debouncePromise, timeout, task queue, polyfills… |
-| `fullstack`       | 5.4 rate limiter, 5.5 LRU cache                     | 5.4 token bucket, 5.5 TTL cache                           |
+| Section           | Series 1                                            | Series 2                                                  | Series 3                                                          |
+| ----------------- | --------------------------------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------- |
+| `basic`           | 1.1–1.5 Codility-style, easy                        | 1.1–1.5 Codility-style, easy                              | 1.1–1.5 Codility-style, easy                                      |
+| `medium`          | 1.6–1.11 Codility-style, medium                     | 1.6–1.11 Codility-style, medium                           | 1.6–1.11 Codility-style, medium                                   |
+| `hard`            | 1.12–1.16 Codility-style, hard                      | 1.12–1.16 Codility-style, hard                            | 1.12–1.16 Codility-style, hard                                    |
+| `js-from-scratch` | 2.1–2.12 debounce, throttle, promiseAll, polyfills… | 2.1–2.12 debouncePromise, timeout, task queue, polyfills… | 2.1–2.12 request batcher, circuit breaker, SWR cache, polyfills… |
+| `fullstack`       | 5.4 rate limiter, 5.5 LRU cache                     | 5.4 token bucket, 5.5 TTL cache                           | 5.4 fixed-window limiter + headers, 5.5 LFU cache                 |
 
 ## Running tests
 
-Series 1 is the default. Add `--series 2` (or `-s 2`) for series 2.
+Series 1 is the default. Add `--series 2` / `-s 2` for series 2, or `-s 3` for series 3.
 
 ```sh
 node run-tests.js                          # every series 1 test
@@ -78,6 +80,9 @@ node run-tests.js -s 2                     # every series 2 test
 node run-tests.js -s 2 hard coin-ways      # one series 2 question
 node run-tests.js -s 2 --list              # list series 2
 
+node run-tests.js -s 3 medium car-pooling  # one series 3 question
+node run-tests.js -s 3                     # every series 3 test
+
 node run-tests.js --help                   # usage
 ```
 
@@ -87,8 +92,10 @@ The same through npm (note the `--`):
 npm test                                   # series 1, everything
 npm test -- basic rotate-array             # series 1, one question
 npm run test:2 -- hard coin-ways           # series 2, one question
+npm run test:3 -- hard open-the-lock       # series 3, one question
 npm run test:list                          # list series 1
 npm run test:2:list                        # list series 2
+npm run test:3:list                        # list series 3
 ```
 
 Any test that runs longer than 10 seconds fails instead of hanging. On `main` every test fails,
@@ -129,5 +136,5 @@ SOLUTIONS_DIR=./my-other-attempt node run-tests.js hard
 1. On the `practice` branch, open a question file, read the prompt and examples, and set a timer
    (30 min Easy, 45 Medium, 60 Hard).
 2. Write your solution in the stub function. Keep the `export { ... }` line at the bottom.
-3. Run that question's tests: `node run-tests.js [-s 2] <section> <question>`.
+3. Run that question's tests: `node run-tests.js [-s 2|3] <section> <question>`.
 4. Score yourself 1–4 and redo anything scored 1–2 a week later.

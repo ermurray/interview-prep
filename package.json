@@ -8,6 +8,8 @@
     "test:list": "node run-tests.js --list",
     "test:2": "node run-tests.js --series 2",
     "test:2:list": "node run-tests.js --series 2 --list",
+    "test:3": "node run-tests.js --series 3",
+    "test:3:list": "node run-tests.js --series 3 --list",
     "check:unanswered": "node scripts/check-unanswered.js",
     "setup": "git config core.hooksPath .githooks",
     "lint": "eslint .",
