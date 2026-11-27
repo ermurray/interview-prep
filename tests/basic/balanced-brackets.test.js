@@ -23,4 +23,4 @@ test('right count, wrong order "())(" -> 0', () => assert.equal(balancedBrackets
 test('unclosed openers "((" -> 0', () => assert.equal(balancedBrackets('(('), 0));
 test('200,000 characters of "()" -> 1', () => assert.equal(balancedBrackets('()'.repeat(100000)), 1));
 test('deep nesting that breaks on the last character -> 0', () =>
-  assert.equal(balancedBrackets('('.repeat(100000) + ')'.repeat(99999) + ']'), 0));
+  assert.equal(balancedBrackets(`${'('.repeat(100000)}${')'.repeat(99999)}]`), 0));

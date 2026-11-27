@@ -1,0 +1,14 @@
+{
+  // Makes VS Code's TypeScript engine type-check .js files and show errors inline.
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "checkJs": true,
+    "strict": false,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "types": ["node"]
+  },
+  "exclude": ["node_modules"]
+}
