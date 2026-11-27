@@ -138,7 +138,7 @@ const explainLoadFailure = (stderr) => {
   const errorLine = lines.find((l) => /^\w*(Error|Exception)\b|^Error \[/.test(l)) ?? lines.find(Boolean) ?? 'unknown error';
   const location = lines.find((l) => /^file:\/\/.*:\d+$/.test(l) || /^\/.*:\d+$/.test(l));
   const out = [`      ${red('Could not load the solution:')} ${errorLine}`];
-  if (location) out.push(`      ${dim('at')} ${rel(location.replace(/:(\d+)$/, '')) + ':' + location.match(/:(\d+)$/)[1]}`);
+  if (location) out.push(`      ${dim('at')} ${rel(location.replace(/:(\d+)$/, ''))}:${location.match(/:(\d+)$/)[1]}`);
   if (/SyntaxError/.test(errorLine)) out.push(dim('      (the solution file has a syntax error: is a function left unfinished?)'));
   if (/does not provide an export/.test(errorLine)) out.push(dim('      (add the function to the export { ... } line at the bottom of the file)'));
   return out;
