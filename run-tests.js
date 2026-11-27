@@ -7,6 +7,7 @@
 //   node run-tests.js medium passing-cars best-single-trade  # several questions
 //   node run-tests.js --series 2 hard                 # series 2 (prep-questions-2), also -s 2
 //   node run-tests.js --list                          # list sections and questions (add -s 2)
+//   node run-tests.js --spec basic                    # use Node's built-in reporter instead
 //
 // Via npm:  npm test -- basic rotate-array    |    npm run test:2 -- hard
 import fs from 'node:fs';
@@ -27,6 +28,7 @@ const fail = (msg) => {
 const args = [];
 let series = '1';
 let list = false;
+let spec = false;
 const argv = process.argv.slice(2);
 for (let i = 0; i < argv.length; i++) {
   const a = argv[i];
@@ -35,6 +37,7 @@ for (let i = 0; i < argv.length; i++) {
     console.log(lines.slice(0, lines.findIndex((l) => !l.startsWith('//'))).map((l) => l.replace(/^\/\/ ?/, '')).join('\n'));
     process.exit(0);
   } else if (a === '--list') list = true;
+  else if (a === '--spec') spec = true;
   else if (a === '--series' || a === '-s') series = argv[++i];
   else if (a.startsWith('--series=')) series = a.slice('--series='.length);
   else args.push(a);
@@ -77,5 +80,7 @@ if (!section) {
   files = wanted.map((q) => path.join(TESTS_DIR, section, `${q}.test.js`));
 }
 
-const result = spawnSync(process.execPath, ['--test', '--test-timeout=10000', ...files], { stdio: 'inherit' });
+// The custom reporter prints Expected vs Received under each failing test.
+const reporter = spec ? [] : [`--test-reporter=${path.join(ROOT, 'scripts', 'test-reporter.js')}`, '--test-reporter-destination=stdout'];
+const result = spawnSync(process.execPath, ['--test', '--test-timeout=10000', ...reporter, ...files], { stdio: 'inherit' });
 process.exit(result.status ?? 1);

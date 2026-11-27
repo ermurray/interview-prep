@@ -72,6 +72,28 @@ npm run test:2:list                        # list series 2
 Any test that runs longer than 10 seconds fails instead of hanging. On `main` every test fails,
 because the questions are unanswered.
 
+### Reading the output
+
+Results are grouped by question. Each failing test shows what was expected next to what your
+solution returned, and the same failures are listed again, one line each, at the end of the run:
+
+```
+✖ basic › rotate-array (series 1)
+  ✖ [1, 2, 3, 4, 5], 2 -> [4, 5, 1, 2, 3]  tests/basic/rotate-array.test.js:7
+      Expected: [ 4, 5, 1, 2, 3 ]
+      Received: [ 3, 4, 5, 1, 2 ]
+      first difference at index [0]: expected 4, received 3
+
+Failing tests (1)
+  basic › rotate-array
+    ✖ [1, 2, 3, 4, 5], 2 -> [4, 5, 1, 2, 3]
+      → expected [ 4, 5, 1, 2, 3 ], received [ 3, 4, 5, 1, 2 ]
+```
+
+If your code throws, you get the error and the line in your file that threw. If a file won't load
+(for example, an unfinished function), you get the syntax error and its line. Add `--spec` to use
+Node's built-in output instead: `node run-tests.js --spec basic`.
+
 ### Testing a different solutions folder
 
 Set `SOLUTIONS_DIR` to run the tests against another folder with the same `<section>/<question>.js` layout:
