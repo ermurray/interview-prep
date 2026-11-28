@@ -4,9 +4,10 @@ Practice questions from the *Senior Frontend / Fullstack Interview Practice Set*
 Uses ES modules and Node's built-in test runner, so the tests need nothing installed (Node 20+; developed on Node 24).
 Linting and formatting need `npm install` and Node 24+ (see [Linting](#linting)).
 
-There are three series. Each one practises the same concepts with different problems (for example,
-*unpaired element* → *missing element* → *duplicate value*, or *skyline blocks* → *largest rectangle*
-→ *sum of slice minimums*). Each question in series 2 and 3 names its counterparts in the earlier series.
+There are four series. Each one practises the same concepts with different problems (for example,
+*unpaired element* → *missing element* → *duplicate value* → *majority element*, or *skyline blocks* →
+*largest rectangle* → *sum of slice minimums* → *trapping rain water*). Each question in series 2-4
+names its counterparts in the earlier series.
 
 ## Branches
 
@@ -87,9 +88,11 @@ CI runs the linter on every pull request to `main`, alongside the unanswered che
 prep-questions/<section>/<question>.js     # series 1: question, examples, your solution (exported)
 prep-questions-2/<section>/<question>.js   # series 2
 prep-questions-3/<section>/<question>.js   # series 3
+prep-questions-4/<section>/<question>.js   # series 4
 tests/<section>/<question>.test.js         # series 1 tests
 tests-2/<section>/<question>.test.js       # series 2 tests
 tests-3/<section>/<question>.test.js       # series 3 tests
+tests-4/<section>/<question>.test.js       # series 4 tests
 run-tests.js                               # test runner
 scripts/check-unanswered.js                # keeps main free of answers
 scripts/check-no-practice-commits.js       # keeps practice commits out of main
@@ -98,17 +101,17 @@ eslint.config.js                           # lint rules (see Linting above)
 .prettierrc.json                           # formatting rules
 ```
 
-| Section           | Series 1                                            | Series 2                                                  | Series 3                                                          |
-| ----------------- | --------------------------------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------- |
-| `basic`           | 1.1–1.5 Codility-style, easy                        | 1.1–1.5 Codility-style, easy                              | 1.1–1.5 Codility-style, easy                                      |
-| `medium`          | 1.6–1.11 Codility-style, medium                     | 1.6–1.11 Codility-style, medium                           | 1.6–1.11 Codility-style, medium                                   |
-| `hard`            | 1.12–1.16 Codility-style, hard                      | 1.12–1.16 Codility-style, hard                            | 1.12–1.16 Codility-style, hard                                    |
-| `js-from-scratch` | 2.1–2.12 debounce, throttle, promiseAll, polyfills… | 2.1–2.12 debouncePromise, timeout, task queue, polyfills… | 2.1–2.12 request batcher, circuit breaker, SWR cache, polyfills… |
-| `fullstack`       | 5.4 rate limiter, 5.5 LRU cache                     | 5.4 token bucket, 5.5 TTL cache                           | 5.4 fixed-window limiter + headers, 5.5 LFU cache                 |
+| Section           | Series 1                                 | Series 2                               | Series 3                                  | Series 4                                          |
+| ----------------- | ---------------------------------------- | -------------------------------------- | ----------------------------------------- | ------------------------------------------------- |
+| `basic`           | 1.1–1.5 Codility-style, easy             | 1.1–1.5 easy                           | 1.1–1.5 easy                              | 1.1–1.5 easy                                      |
+| `medium`          | 1.6–1.11 Codility-style, medium          | 1.6–1.11 medium                        | 1.6–1.11 medium                           | 1.6–1.11 medium                                   |
+| `hard`            | 1.12–1.16 Codility-style, hard           | 1.12–1.16 hard                         | 1.12–1.16 hard                            | 1.12–1.16 hard                                    |
+| `js-from-scratch` | debounce, throttle, promiseAll, …        | debouncePromise, timeout, task queue, … | request batcher, circuit breaker, SWR, … | autosave, semaphore, JSON Patch, undo history, … |
+| `fullstack`       | sliding-window log limiter, LRU cache    | token bucket, TTL cache                | fixed-window limiter, LFU cache           | sliding-window counter, consistent hashing        |
 
 ## Running tests
 
-Series 1 is the default. Add `--series 2` / `-s 2` for series 2, or `-s 3` for series 3.
+Series 1 is the default. Add `--series N` / `-s N` for series 2, 3 or 4.
 
 ```sh
 node run-tests.js                          # every series 1 test
@@ -124,6 +127,9 @@ node run-tests.js -s 2 --list              # list series 2
 node run-tests.js -s 3 medium car-pooling  # one series 3 question
 node run-tests.js -s 3                     # every series 3 test
 
+node run-tests.js -s 4 hard word-ladder    # one series 4 question
+node run-tests.js -s 4                     # every series 4 test
+
 node run-tests.js --help                   # usage
 ```
 
@@ -134,9 +140,11 @@ npm test                                   # series 1, everything
 npm test -- basic rotate-array             # series 1, one question
 npm run test:2 -- hard coin-ways           # series 2, one question
 npm run test:3 -- hard open-the-lock       # series 3, one question
+npm run test:4 -- medium min-window        # series 4, one question
 npm run test:list                          # list series 1
 npm run test:2:list                        # list series 2
 npm run test:3:list                        # list series 3
+npm run test:4:list                        # list series 4
 ```
 
 Any test that runs longer than 10 seconds fails instead of hanging. On `main` every test fails,
@@ -177,5 +185,5 @@ SOLUTIONS_DIR=./my-other-attempt node run-tests.js hard
 1. On the `practice` branch, open a question file, read the prompt and examples, and set a timer
    (30 min Easy, 45 Medium, 60 Hard).
 2. Write your solution in the stub function. Keep the `export { ... }` line at the bottom.
-3. Run that question's tests: `node run-tests.js [-s 2|3] <section> <question>`.
+3. Run that question's tests: `node run-tests.js [-s 2|3|4] <section> <question>`.
 4. Score yourself 1–4 and redo anything scored 1–2 a week later.
